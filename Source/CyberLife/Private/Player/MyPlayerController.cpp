@@ -8,11 +8,17 @@
 #include "GameSaver.h"
 #include "InputAction.h"
 #include "Blueprint/UserWidget.h"
+#include "Items/InventoryComponent.h"
+#include "Items/Item.h"
+#include "Items/ItemObject.h"
+#include "Items/Weapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/InteractionComponent.h"
 #include "Player/PlayerCharacter.h"
 #include "UI/InventoryWidget.h"
 #include "UI/StatsWidget.h"
+
+
 
 void AMyPlayerController::BeginPlay()
 {
@@ -24,14 +30,11 @@ void AMyPlayerController::BeginPlay()
 	StatsWidget = Cast<UStatsWidget>(CreateWidget(this, Stats));
 	check(StatsWidget);
 	StatsWidget->AddToViewport();
-	/*if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(MappingContext, 0);
 	}
-
-	ActiveInventoryWidget = Cast<UInventoryWidget>(CreateWidget(GetWorld(), InventoryWidgetClass));
-	ActiveInventoryWidget->Init(PlayerCharacter->GetInteractionComponent()->GetInventory(), 50.0f);
-*/
+	
 
 	if(UGameplayStatics::DoesSaveGameExist("save1", 0))
 	{
@@ -45,7 +48,17 @@ void AMyPlayerController::BeginPlay()
 		UGameplayStatics::SaveGameToSlot(GameSaver, "save1", 0);
 	}
 	
-	
+}
+
+void AMyPlayerController::InitInventory(UInventoryComponent* InventoryComponent)
+{
+	Inventory = InventoryComponent;
+
+	ActiveInventoryWidget = Cast<UInventoryWidget>(CreateWidget(GetWorld(), InventoryWidgetClass));
+	ActiveInventoryWidget->Init(Inventory, 50.0f);
+
+	Inventory->OnEquip.AddDynamic(this, &AMyPlayerController::EquipWeapon);
+	Inventory->OnUnEquip.AddDynamic(this, &AMyPlayerController::UnEquipWeapon);
 }
 
 void AMyPlayerController::SetupInputComponent()
@@ -54,9 +67,10 @@ void AMyPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
-		//EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Triggered, this, &AMyPlayerController::ToggleInventoryWidget);
+		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Triggered, this, &AMyPlayerController::ToggleInventoryWidget);
 		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Triggered, this, &AMyPlayerController::SaveGame);
 		EnhancedInputComponent->BindAction(LoadAction, ETriggerEvent::Triggered, this, &AMyPlayerController::LoadGame);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AMyPlayerController::AttackWeapon);
 	}
 }
 
@@ -87,6 +101,28 @@ void AMyPlayerController::ShowInventoryWidget()
 	InputModeGameAndUI.SetHideCursorDuringCapture(false);
 	SetInputMode(InputModeGameAndUI);
 	SetShowMouseCursor(true);
+}
+
+void AMyPlayerController::EquipWeapon(UItemObject* WeaponItemObject)
+{
+	auto* Weapon = CreateBlueprintDefferd<AWeapon>(GetWorld(), WeaponItemObject->GetBPItemName(), PlayerCharacter->GetActorTransform());
+	Weapon->SetItemObject(WeaponItemObject);
+	EquipedWeapon = Weapon;
+	EquipedWeapon->Equip();
+	PlayerCharacter->EquipWeapon(EquipedWeapon);
+}
+
+void AMyPlayerController::UnEquipWeapon()
+{
+	EquipedWeapon->UnEquip();
+	EquipedWeapon->Destroy();
+	EquipedWeapon = nullptr;
+	PlayerCharacter->UnEquipWeapon();
+}
+
+void AMyPlayerController::AttackWeapon()
+{
+	PlayerCharacter->Attack(EquipedWeapon);
 }
 
 void AMyPlayerController::SaveGame()

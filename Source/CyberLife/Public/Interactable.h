@@ -7,7 +7,7 @@
 #include "Interactable.generated.h"
 
 class UInteractionComponent;
-// This class does not need to be modified.
+
 UINTERFACE(MinimalAPI)
 class UInteractable : public UInterface
 {
@@ -21,9 +21,9 @@ class CYBERLIFE_API IInteractable
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
-	public:
+public:
 
 	virtual void Interact(UInteractionComponent* InteractionComponent) = 0;
+	virtual void ToggleFocus(bool Focus) = 0;
 
 };

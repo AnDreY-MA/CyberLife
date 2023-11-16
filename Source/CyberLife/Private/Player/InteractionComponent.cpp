@@ -3,9 +3,7 @@
 #include "interactable.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
-#include "Items/InventoryComponent.h"
 #include "Items/Weapon.h"
-#include "Items/ItemObject.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 
 UInteractionComponent::UInteractionComponent() :
@@ -25,11 +23,15 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 		PhysicsHandle->SetTargetLocationAndRotation(DefaultGrabObjectLocation->GetComponentLocation(),
 			DefaultGrabObjectLocation->GetComponentRotation());
 	}
+
 }
 
 void UInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetComponentTickEnabled(false);
+
 
 }
 
@@ -53,21 +55,6 @@ void UInteractionComponent::Interact()
 	}
 }
 
-void UInteractionComponent::SetInventoryBP(UInventoryComponent* InventoryComponentBP)
-{
-	InventoryComponent = InventoryComponentBP;
-	InventoryComponent->OnEquip.AddDynamic(this, &UInteractionComponent::EquipWeapon);
-	InventoryComponent->OnUnEquip.AddDynamic(this, &UInteractionComponent::UnEquipWeapon);
-	
-}
-
-void UInteractionComponent::AttackWeapon()
-{
-	if (!EquipedWeapon) return;
-
-	EquipedWeapon->Attack(GetOwner());
-}
-
 bool UInteractionComponent::IsHoldingObject() const
 {
 	return IsValid(HoldingObject);
@@ -83,6 +70,7 @@ void UInteractionComponent::ThrowObject()
 void UInteractionComponent::TraceForObject()
 {
 	const FVector Start = CameraComponent->GetComponentLocation();
+	
 	const FVector End = CameraComponent->GetForwardVector() * InteractDistance + Start;
 	FHitResult HitResult;
 
@@ -109,6 +97,8 @@ void UInteractionComponent::GrabObject(const FHitResult HitResult)
 			HitResult.Component->GetComponentLocation(), HitResult.Component->GetComponentRotation());
 	HoldingObject = HitResult.GetComponent();
 	HoldingObject->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
+	SetComponentTickEnabled(true);
+
 
 }
 
@@ -117,24 +107,5 @@ void UInteractionComponent::DropObject()
 	HoldingObject->SetCollisionResponseToChannel(ECC_Destructible, ECR_Block);
 	PhysicsHandle->ReleaseComponent();
 	HoldingObject = nullptr;
+	SetComponentTickEnabled(false);
 }
-
-void UInteractionComponent::EquipWeapon(UItemObject* WeaponItemObject)
-{
-	auto* Weapon = CreateBlueprintDefferd<AWeapon>(GetWorld(), WeaponItemObject->GetBPItemName(), GetOwner()->GetActorTransform());
-	Weapon->SetItemObject(WeaponItemObject);
-	EquipedWeapon = Weapon;
-	EquipedWeapon->Equip();
-	OnWeaponEquip.Broadcast(EquipedWeapon);
-	
-}
-
-void UInteractionComponent::UnEquipWeapon()
-{
-	EquipedWeapon->UnEquip();
-	EquipedWeapon->Destroy();
-	EquipedWeapon = nullptr;
-	OnWeaponUnEquip.Broadcast();
-
-}
-

@@ -17,4 +17,5 @@ void AMyGameStateBase::SpawnItemActor(UItemObject* ItemObject, AActor* Actor, bo
 
 	auto* Item = CreateBlueprintDefferd<AItem>(GetWorld(), ItemObject->GetBPItemName(), FTransform(SpawnLocation));
 	Item->SetItemObject(ItemObject);
+	
 }

@@ -25,6 +25,9 @@ public:
 	FOnEquip OnEquip;
 	FOnUnEquip OnUnEquip;
 
+	UFUNCTION(BlueprintCallable)
+	bool IsSpaceAvailable(UItemObject* ItemObject, int32 TopLeftIndex);
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(AllowPrivateAccess))
 	int32 Columns;
@@ -42,6 +45,7 @@ public:
 	FORCEINLINE int32 GetColumns() const { return Columns; }
 	UFUNCTION(BlueprintPure)
 	FORCEINLINE int32 GetRows() const { return Rows; }
+	
 	UFUNCTION(BlueprintPure)
 	int32 TileToIndex(FTile Tile) const;
 	UFUNCTION(BlueprintPure)
@@ -73,6 +77,9 @@ protected:
 	void OnAddItem(UItemObject* Item);
 	UFUNCTION(BlueprintCallable)
 	bool IsTileValid(const FTile Tile) const;
+
+	UFUNCTION(BlueprintCallable)
+	void AddItemAt(UItemObject* ItemObject, int32 TopLeftIndex);
 
 	UFUNCTION(BlueprintCallable)
 	void CallInventoryChangedBP() const;

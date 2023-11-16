@@ -7,6 +7,7 @@
 #include "Items/InventoryComponent.h"
 #include "Items/ItemObject.h"
 #include "Player/InteractionComponent.h"
+#include "Player/MyPlayerController.h"
 #include "Player/PlayerCharacter.h"
 
 AItem::AItem()
@@ -41,7 +42,11 @@ void AItem::SetItemObject(UItemObject* ItemObjectParam)
 
 void AItem::Interact(UInteractionComponent* InteractionComponent)
 {
-	InteractionComponent->GetInventory()->AddItem(ItemObject);
+	const auto* PlayerCharacter = Cast<APlayerCharacter>(InteractionComponent->GetOwner());
+	check(PlayerCharacter)
+	auto* PlayerController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
+	check(PlayerController);
+	PlayerController->GetInventory()->AddItem(ItemObject);
 	Destroy();
 	
 }

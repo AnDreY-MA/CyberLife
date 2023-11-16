@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class AItem;
 class AWeapon;
 class UInventoryComponent;
 class UInputMappingContext;
@@ -47,6 +48,8 @@ private:
 	UCameraComponent* CameraComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta=(AllowPrivateAccess))
 	USkeletalMeshComponent* MeshArms;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta=(AllowPrivateAccess))
+	UStaticMeshComponent* Sylinder;
 
 	UPROPERTY(EditDefaultsOnly, Category="Camera")
 	TSubclassOf<UCameraShakeBase> CameraShakeIdle;
@@ -72,19 +75,19 @@ private:
 	UInputAction* AttackAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UInteractionComponent* InteractionComponent;
+	TObjectPtr<UInteractionComponent> InteractionComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UArrowComponent* DefaultGrabObjectLocation;
+	TObjectPtr<UArrowComponent> DefaultGrabObjectLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UPrimitiveComponent* HoldingObject;
+	TObjectPtr<UPrimitiveComponent> HoldingObject;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UPhysicsHandleComponent* PhysicsHandle;
+	TObjectPtr<UPhysicsHandleComponent> PhysicsHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InventoryUI", meta=(AllowPrivateAccess))
 	TSubclassOf<UUserWidget> InventoryWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InventoryUI", meta=(AllowPrivateAccess))
-	UInventoryWidget* ActiveInventoryWidget;
+	TObjectPtr<UInventoryWidget> ActiveInventoryWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crouch", meta=(AllowPrivateAccess))
 	FVector CrouchEyeOffset;
@@ -114,7 +117,6 @@ private:
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 	void StartCrouch();
-	void ToggleInventoryWidget();
 
 	UFUNCTION()
 	void EquipWeapon(AWeapon* Weapon);
@@ -122,12 +124,9 @@ private:
 	UFUNCTION()
 	void UnEquipWeapon();
 
-	void Attack();
+	void Attack(AWeapon* EquipedWeapon);
 
 	virtual void ApplyDamageMomentum(float DamageTaken, FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser) override;
-
-	void HideInventoryWidget(APlayerController* PlayerController);
-	void ShowInventoryWidget(APlayerController* PlayerController);
 
 	friend class AMyPlayerController;
 	

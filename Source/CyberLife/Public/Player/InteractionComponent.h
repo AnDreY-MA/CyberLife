@@ -5,11 +5,11 @@
 #include "Components/ActorComponent.h"
 #include "InteractionComponent.generated.h"
 
+class AItem;
 class AWeapon;
 class UPhysicsHandleComponent;
 class UCameraComponent;
 class UArrowComponent;
-class UInventoryComponent;
 class UItemObject;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquip, AWeapon*, Weapon);
@@ -26,43 +26,28 @@ public:
 	FOnWeaponEquip OnWeaponEquip;
 	FOnWeaponUnEquip OnWeaponUnEquip;
 
+	void Init(UPhysicsHandleComponent* PhysicsHandleComponent, UArrowComponent* DefaultLocation, UCameraComponent* CameraComponentParam);
+	void Interact();
+
+	bool IsHoldingObject() const;
+
+	void ThrowObject();
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Interact", meta=(AllowPrivateAccess))
 	float InteractDistance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Grabing", meta=(AllowPrivateAccess))
 	float ForceThrow;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UArrowComponent* DefaultGrabObjectLocation;
+	TObjectPtr<UArrowComponent> DefaultGrabObjectLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UPrimitiveComponent* HoldingObject;
+	TObjectPtr<UPrimitiveComponent> HoldingObject;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UCameraComponent* CameraComponent;
+	TObjectPtr<UCameraComponent> CameraComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
 	UPhysicsHandleComponent* PhysicsHandle;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta=(AllowPrivateAccess))
-	UInventoryComponent* InventoryComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta=(AllowPrivateAccess))
-	AWeapon* EquipedWeapon;
-
-public:
-	void Init(UPhysicsHandleComponent* PhysicsHandleComponent, UArrowComponent* DefaultLocation, UCameraComponent* CameraComponentParam);
-	void Interact();
-	UFUNCTION(BlueprintCallable)
-	void SetInventoryBP(UInventoryComponent* InventoryComponentBP);
-
-	void AttackWeapon();
-
-	bool IsHoldingObject() const;
-
-	void ThrowObject();
-
-	FORCEINLINE UInventoryComponent* GetInventory() const { return InventoryComponent; }
-
-	FORCEINLINE AWeapon* GetWaepon() const { return EquipedWeapon; }
-	
 private:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void BeginPlay() override;
@@ -71,16 +56,4 @@ private:
 	void GrabObject(const FHitResult HitResult);
 	void DropObject();
 	
-	UFUNCTION()
-	void EquipWeapon(UItemObject* WeaponItemObject);
-	UFUNCTION()
-	void UnEquipWeapon();
-
-	template<typename T>
-	T* CreateBlueprintDefferd(UWorld* World, const FString& Name, const FTransform& Transform = FTransform::Identity)
-	{
-		const UBlueprint* Blueprint = LoadObject<UBlueprint>(nullptr, *Name);
-		return (World && Blueprint) ? World->SpawnActorDeferred<T>(Blueprint->GeneratedClass, Transform) : nullptr;
-	}
-		
 };

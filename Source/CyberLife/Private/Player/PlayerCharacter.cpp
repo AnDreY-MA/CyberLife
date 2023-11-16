@@ -15,6 +15,7 @@
 #include "Items/Weapon.h"
 #include "Logging/LogMacros.h"
 #include "Player/InteractionComponent.h"
+#include "Player/MyPlayerController.h"
 #include "UI/InventoryWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(PlayerLog, All, All);
@@ -33,6 +34,10 @@ APlayerCharacter::APlayerCharacter():
 
 	MeshArms = CreateDefaultSubobject<USkeletalMeshComponent>("Arms");
 	MeshArms->SetupAttachment(CameraComponent);
+
+	Sylinder = CreateDefaultSubobject<UStaticMeshComponent>("Interact");
+	Sylinder->SetupAttachment(CameraComponent);
+	
 	
 	DefaultGrabObjectLocation = CreateDefaultSubobject<UArrowComponent>("DefaultLocationObject");
 	DefaultGrabObjectLocation->SetupAttachment(CameraComponent);
@@ -48,18 +53,16 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (const auto* Contr= Cast<APlayerController>(Controller))
+	if (const auto* Contr= Cast<AMyPlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(Contr->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(MappingContext, 0);
 		}
-		
-		ActiveInventoryWidget = Cast<UInventoryWidget>(CreateWidget(GetWorld(), InventoryWidgetClass));
-		ActiveInventoryWidget->Init(InteractionComponent->GetInventory(), 50.0f);
+
+		InteractionComponent->Init(PhysicsHandle, DefaultGrabObjectLocation, CameraComponent);
 	}
 
-	InteractionComponent->Init(PhysicsHandle, DefaultGrabObjectLocation, CameraComponent);
 	InteractionComponent->OnWeaponEquip.AddDynamic(this, &APlayerCharacter::EquipWeapon);
 	InteractionComponent->OnWeaponUnEquip.AddDynamic(this, &APlayerCharacter::UnEquipWeapon);
 	
@@ -95,12 +98,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		//Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
-
-		//Open Inventory
-		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Triggered, this, &APlayerCharacter::ToggleInventoryWidget);
+		
 
 		//Attack
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
+		//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Attack);
 		
 	}
 
@@ -187,20 +188,6 @@ void APlayerCharacter::StartCrouch()
 	}
 }
 
-void APlayerCharacter::ToggleInventoryWidget()
-{
-	auto* PlayerController= Cast<APlayerController>(Controller);
-	
-	if(ActiveInventoryWidget->IsInViewport())
-	{
-		HideInventoryWidget(PlayerController);
-	}
-	else
-	{
-		ShowInventoryWidget(PlayerController);
-	}
-}
-
 void APlayerCharacter::EquipWeapon(AWeapon* Weapon)
 {
 	const USkeletalMeshSocket* HandSocket = MeshArms->GetSocketByName(FName("WeaponSocket"));
@@ -217,7 +204,7 @@ void APlayerCharacter::UnEquipWeapon()
 	OnUnEquipWeapon.Broadcast();
 }
 
-void APlayerCharacter::Attack()
+void APlayerCharacter::Attack(AWeapon* EquipedWeapon)
 {
 	if (InteractionComponent->IsHoldingObject())
 	{
@@ -225,8 +212,10 @@ void APlayerCharacter::Attack()
 	}
 	else
 	{
-		InteractionComponent->AttackWeapon();
-		const auto* MeeleWeapon = Cast<AMeeleWeapon>(InteractionComponent->GetWaepon());
+		if (!EquipedWeapon) return;
+
+		EquipedWeapon->Attack(this);
+		const auto* MeeleWeapon = Cast<AMeeleWeapon>(EquipedWeapon);
 		if (MeeleWeapon && MeeleAttackAnim)
 		{
 			UAnimInstance* AnimInstance = MeshArms->GetAnimInstance();
@@ -253,23 +242,4 @@ void APlayerCharacter::ApplyDamageMomentum(float DamageTaken, FDamageEvent const
 	{
 		UE_LOG(PlayerLog, Display, TEXT("Dead"));
 	}	
-}
-
-void APlayerCharacter::HideInventoryWidget(APlayerController* PlayerController)
-{
-	ActiveInventoryWidget->RemoveFromParent();
-	PlayerController->SetShowMouseCursor(false);
-	const FInputModeGameOnly InputModeGameOnly;
-	PlayerController->SetInputMode(InputModeGameOnly);
-	
-}
-
-void APlayerCharacter::ShowInventoryWidget(APlayerController* PlayerController)
-{
-	ActiveInventoryWidget->AddToViewport();
-	FInputModeGameAndUI InputModeGameAndUI;
-	InputModeGameAndUI.SetHideCursorDuringCapture(false);
-	PlayerController->SetInputMode(InputModeGameAndUI);
-	PlayerController->SetShowMouseCursor(true);
-	
 }

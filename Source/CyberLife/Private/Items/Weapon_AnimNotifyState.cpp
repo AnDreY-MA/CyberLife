@@ -3,6 +3,7 @@
 #include "Items/MeeleWeapon.h"
 #include "Player/InteractionComponent.h"
 #include "Player/PlayerCharacter.h"
+#include "Player/MyPlayerController.h"
 
 void UWeapon_AnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 										  float TotalDuration)
@@ -25,9 +26,9 @@ void UWeapon_AnimNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimS
 AMeeleWeapon* UWeapon_AnimNotifyState::GetMeeleWeapon(const USkeletalMeshComponent* MeshComp) const
 {
 	const auto* PlayerCharacter = Cast<APlayerCharacter>(MeshComp->GetOwner());
+	const auto* PlayerController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
 	if (!PlayerCharacter) return nullptr;
-	const auto* InteractionComponent = PlayerCharacter->GetInteractionComponent();
-	auto* MeeleWeapon = Cast<AMeeleWeapon>(InteractionComponent->GetWaepon());
+	auto* MeeleWeapon = Cast<AMeeleWeapon>(PlayerController->GetWaepon());
 
 	return MeeleWeapon;
 }

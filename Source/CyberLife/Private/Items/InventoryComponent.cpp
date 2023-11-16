@@ -1,11 +1,12 @@
 #include "Items/InventoryComponent.h"
 
 #include "Items/ItemObject.h"
+#include "Kismet/KismetArrayLibrary.h"
 #include "UI/GridElements.h"
 
 UInventoryComponent::UInventoryComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 }
 
@@ -14,6 +15,30 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 
 	Items.SetNum(Columns * Rows);
+}
+
+bool UInventoryComponent::IsSpaceAvailable(UItemObject* ItemObject, int32 TopLeftIndex)
+{
+	const int32 XFirstIndex = IndexToTile(TopLeftIndex).X;
+	const int32 XLastIndex = IndexToTile(TopLeftIndex).X + (ItemObject->GetDimensions().X - 1);
+	const int32 YFirstIndex = IndexToTile(TopLeftIndex).Y;
+	const int32 YLastIndex = IndexToTile(TopLeftIndex).Y + (ItemObject->GetDimensions().Y - 1);
+	for (int32 X = XFirstIndex; X <= XLastIndex; ++X)
+	{
+		for(int32 Y = YFirstIndex; Y <= YLastIndex; ++Y)
+		{
+			FTile Tile {X, Y};
+			if(IsTileValid(Tile) == false) return false;
+
+			UItemObject* ItemOut;
+			bool bValidOut;
+			GetItemAtIndex(TileToIndex(Tile), ItemOut, bValidOut);
+			if(bValidOut == false) return false;
+			if(IsValid(ItemOut)) return false;
+		}
+	}
+	
+	return true;
 }
 
 void UInventoryComponent::ForEachIndex(UItemObject* ItemObject, int32 TopLeftIndex, FTile& Tile)
@@ -94,9 +119,28 @@ bool UInventoryComponent::IsTileValid(const FTile Tile) const
 	return bResult;
 }
 
+void UInventoryComponent::AddItemAt(UItemObject* ItemObject, int32 TopLeftIndex)
+{
+	const int32 XFirstIndex = IndexToTile(TopLeftIndex).X;
+	const int32 XLastIndex = IndexToTile(TopLeftIndex).X + (ItemObject->GetDimensions().X - 1);
+	const int32 YFirstIndex = IndexToTile(TopLeftIndex).Y;
+	const int32 YLastIndex = IndexToTile(TopLeftIndex).Y + (ItemObject->GetDimensions().Y - 1);
+	for (int32 X = XFirstIndex; X <= XLastIndex; ++X)
+	{
+		for(int32 Y = YFirstIndex; Y <= YLastIndex; ++Y)
+		{
+			const FTile Tile {X, Y};
+			Items[TileToIndex(Tile)] = ItemObject;
+		}
+	}
+
+	CallInventoryChangedBP();
+}
+
 void UInventoryComponent::CallInventoryChangedBP() const
 {
 	if(!OnInventoryChanged.IsBound()) return;
+	
 	OnInventoryChanged.Broadcast();
 }
 
