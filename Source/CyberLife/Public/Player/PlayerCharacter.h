@@ -6,8 +6,10 @@
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
 #include "GameFramework/Character.h"
+#include "Narrative/NoteData.h"
 #include "PlayerCharacter.generated.h"
 
+class UVaultingComponent;
 class AItem;
 class AWeapon;
 class UInventoryComponent;
@@ -16,13 +18,15 @@ class UInputAction;
 class UCameraComponent;
 class UPhysicsHandleComponent;
 class UInteractionComponent;
-class UInventoryWidget;
+class USpotLightComponent;
 
 //For PlayerAnimInstance
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUnEquipWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipMeeleWeapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, ValueChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAddNoteData, FNoteData, NoteData);
+
 
 UCLASS()
 class CYBERLIFE_API APlayerCharacter : public ACharacter
@@ -40,6 +44,7 @@ public:
 	FOnEquipMeeleWeapon OnEquipMeeleWeapon;
 	
 	FOnHealthChanged OnHealthChanged;
+	FOnAddNoteData OnAddNoteData;
 
 	UInteractionComponent* GetInteractionComponent() const { return InteractionComponent; }
 
@@ -51,12 +56,20 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera", meta=(AllowPrivateAccess))
 	UStaticMeshComponent* Sylinder;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	USpotLightComponent* Flashlight;
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
+	UStaticMeshComponent* FlashlightCone;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* FlashlightSound;
+
 	UPROPERTY(EditDefaultsOnly, Category="Camera")
 	TSubclassOf<UCameraShakeBase> CameraShakeIdle;
 	UPROPERTY(EditDefaultsOnly, Category="Camera")
 	TSubclassOf<UCameraShakeBase> CameraShakeWalk;
 
-	//Input
+#pragma region Input
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta=(AllowPrivateAccess))
 	UInputMappingContext* MappingContext;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta=(AllowPrivateAccess))
@@ -73,9 +86,15 @@ private:
 	UInputAction* ToggleInventoryAction;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta=(AllowPrivateAccess))
 	UInputAction* AttackAction;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess))
+	UInputAction* FlashlightAction;
+#pragma endregion Input
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
 	TObjectPtr<UInteractionComponent> InteractionComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category="Vaulting")
+	TObjectPtr<UVaultingComponent> VaultingComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
 	TObjectPtr<UArrowComponent> DefaultGrabObjectLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
@@ -83,11 +102,6 @@ private:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
 	TObjectPtr<UPhysicsHandleComponent> PhysicsHandle;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InventoryUI", meta=(AllowPrivateAccess))
-	TSubclassOf<UUserWidget> InventoryWidgetClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InventoryUI", meta=(AllowPrivateAccess))
-	TObjectPtr<UInventoryWidget> ActiveInventoryWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Crouch", meta=(AllowPrivateAccess))
 	FVector CrouchEyeOffset;
@@ -99,6 +113,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta=(AllowPrivateAccess))
 	float CurrentHealth;
+
+	UPROPERTY()
+	bool bFlashlightOn{ false };
+
+	UPROPERTY()
+	bool bEnableFlashlight {false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta=(AllowPrivateAccess))
 	UAnimMontage* MeeleAttackAnim;
@@ -117,12 +137,20 @@ private:
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 	void StartCrouch();
+	void SwitchFlashlight();
+	void FlashlightActive(bool bActive, float Intensity);
+
+	UFUNCTION()
+	void AddNote(FNoteData NoteData);
 
 	UFUNCTION()
 	void EquipWeapon(AWeapon* Weapon);
 
 	UFUNCTION()
 	void UnEquipWeapon();
+
+	UFUNCTION()
+	void EnableFlashlight();
 
 	void Attack(AWeapon* EquipedWeapon);
 

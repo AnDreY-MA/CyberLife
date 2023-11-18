@@ -6,13 +6,15 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/BackgroundBlur.h"
 #include "Components/Border.h"
-#include "InventoryWidget.generated.h"
+#include "DisplayWidget.generated.h"
 
+class ULogBook;
+class ULogBookWidget;
 class UInventoryComponent;
 class UInventoryGridWidget;
 
 UCLASS()
-class CYBERLIFE_API UInventoryWidget : public UUserWidget
+class CYBERLIFE_API UDisplayWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -23,9 +25,11 @@ protected:
 	UBackgroundBlur* BackgroundBlur;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	UInventoryGridWidget* InventoryGridWidgetBP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	TObjectPtr<ULogBookWidget> LogBookWidget;
 
 public:
-	void Init(UInventoryComponent* Inventory, float TileSize);
+	void Init(UInventoryComponent* Inventory, float TileSize, ULogBook* LogBook);
 
 private:
 

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ActorComponent.h"
+#include "Narrative/NoteData.h"
 #include "InteractionComponent.generated.h"
 
 class AItem;
@@ -14,6 +15,8 @@ class UItemObject;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponEquip, AWeapon*, Weapon);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponUnEquip);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnFlashlightPickUp);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNoteLogPickUp, FNoteData, NoteData);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CYBERLIFE_API UInteractionComponent : public UActorComponent
@@ -25,10 +28,13 @@ public:
 
 	FOnWeaponEquip OnWeaponEquip;
 	FOnWeaponUnEquip OnWeaponUnEquip;
+	FOnFlashlightPickUp OnFlashlightPickUp;
+	FOnNoteLogPickUp OnNoteLogPickUp;
 
 	void Init(UPhysicsHandleComponent* PhysicsHandleComponent, UArrowComponent* DefaultLocation, UCameraComponent* CameraComponentParam);
 	void Interact();
-
+	
+	void PickUpNote(const FNoteData& NoteData);
 	bool IsHoldingObject() const;
 
 	void ThrowObject();

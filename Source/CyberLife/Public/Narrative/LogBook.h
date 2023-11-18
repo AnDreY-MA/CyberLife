@@ -4,19 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NoteData.h"
 #include "LogBook.generated.h"
 
-USTRUCT(BlueprintType)
-struct FNoteData : public FTableRowBase
-{
-	GENERATED_BODY()
+class UBorder;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDataUpdated, FNoteData, NoteData);
 
-	UPROPERTY(EditDefaultsOnly)
-	FString Name;
+class UUserWidget;
 
-	UPROPERTY(EditDefaultsOnly, meta=(MultiLine=true))
-	FText Description;
-};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CYBERLIFE_API ULogBook : public UActorComponent
@@ -26,9 +21,20 @@ class CYBERLIFE_API ULogBook : public UActorComponent
 public:	
 	ULogBook();
 
+	FOnDataUpdated OnDataUpdated;
+	
 	void AddNote(const FNoteData& Note);
 
+	TSubclassOf<UUserWidget> GetTitleNoteWidget() { return TileNoteWidgetclass; }
+	
+protected:
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> TileNoteWidgetclass;
+
 private:
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	TArray<FNoteData> Notes;
+
+	
 };

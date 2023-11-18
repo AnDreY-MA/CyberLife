@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Narrative/NoteData.h"
 #include "MyPlayerController.generated.h"
 
+class AMainHUD;
+class ULogBook;
 class AItem;
 class UInventoryComponent;
 class UGameSaver;
@@ -13,7 +16,7 @@ class APlayerCharacter;
 class UInputMappingContext;
 class UInputAction;
 class UStatsWidget;
-class UInventoryWidget;
+class UDisplayWidget;
 class AWeapon;
 
 UCLASS()
@@ -22,6 +25,8 @@ class CYBERLIFE_API AMyPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	AMyPlayerController();
+	
 	AWeapon* GetWaepon() const { return EquipedWeapon; }
 
 	UInventoryComponent* GetInventory() { return Inventory; }
@@ -36,8 +41,6 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> PointScreen;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UUserWidget> Stats;
 
 	UPROPERTY(BlueprintReadWrite, meta=(AllowPrivateAccess))
 	UStatsWidget* StatsWidget;
@@ -53,15 +56,20 @@ private:
 	TObjectPtr<UInputAction> SaveAction;
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> LoadAction;
-#pragma endregion  Input
+#pragma endregion Input
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InventoryUI", meta=(AllowPrivateAccess))
-	TSubclassOf<UUserWidget> InventoryWidgetClass;
+	TSubclassOf<UUserWidget> DisplayWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "InventoryUI", meta=(AllowPrivateAccess))
-	TObjectPtr<UInventoryWidget> ActiveInventoryWidget;
+	TObjectPtr<UDisplayWidget> DisplayWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category="HUD")
+	TObjectPtr<AMainHUD> MainHUD;
 
 	UPROPERTY()
 	TObjectPtr<UInventoryComponent> Inventory;
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<ULogBook> LogBook;
 
 	UPROPERTY()
 	TObjectPtr<AWeapon> EquipedWeapon;
@@ -80,6 +88,9 @@ private:
 	void ToggleInventoryWidget();
 	void HideInventoryWidget();
 	void ShowInventoryWidget();
+
+	UFUNCTION()
+	void AddNote(FNoteData NoteData);
 
 	UFUNCTION()
 	void EquipWeapon(UItemObject* WeaponItemObject);

@@ -7,16 +7,17 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
-#include "Blueprint/UserWidget.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Items/MeeleWeapon.h"
 #include "Items/Weapon.h"
+#include "Kismet/GameplayStatics.h"
 #include "Logging/LogMacros.h"
 #include "Player/InteractionComponent.h"
 #include "Player/MyPlayerController.h"
-#include "UI/InventoryWidget.h"
+#include "Player/VaultingComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(PlayerLog, All, All);
 
@@ -35,6 +36,11 @@ APlayerCharacter::APlayerCharacter():
 	MeshArms = CreateDefaultSubobject<USkeletalMeshComponent>("Arms");
 	MeshArms->SetupAttachment(CameraComponent);
 
+	Flashlight = CreateDefaultSubobject<USpotLightComponent>("Flashligth");
+	Flashlight->SetupAttachment(CameraComponent);
+	FlashlightCone = CreateDefaultSubobject<UStaticMeshComponent>("FlashligthCone");
+	FlashlightCone->SetupAttachment(Flashlight);
+
 	Sylinder = CreateDefaultSubobject<UStaticMeshComponent>("Interact");
 	Sylinder->SetupAttachment(CameraComponent);
 	
@@ -44,6 +50,7 @@ APlayerCharacter::APlayerCharacter():
 
 	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>("Handle");
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>("InteractionComponent");
+	VaultingComponent = CreateDefaultSubobject<UVaultingComponent>("VaultingComponent");
 
 	CurrentHealth = MaxHealth;
 	
@@ -65,6 +72,8 @@ void APlayerCharacter::BeginPlay()
 
 	InteractionComponent->OnWeaponEquip.AddDynamic(this, &APlayerCharacter::EquipWeapon);
 	InteractionComponent->OnWeaponUnEquip.AddDynamic(this, &APlayerCharacter::UnEquipWeapon);
+	InteractionComponent->OnFlashlightPickUp.AddDynamic(this, &APlayerCharacter::EnableFlashlight);
+	InteractionComponent->OnNoteLogPickUp.AddDynamic(this, &APlayerCharacter::AddNote);
 	
 }
 
@@ -84,7 +93,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Jumping);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		//Crouch
@@ -98,6 +107,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		//Interact
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Interact);
+		
+		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Started, this, &APlayerCharacter::SwitchFlashlight);
 		
 
 		//Attack
@@ -140,7 +151,21 @@ void APlayerCharacter::CameraShake() const
 
 void APlayerCharacter::Jumping()
 {
-	Jump();
+	if(GetMovementComponent()->IsCrouching())
+	{
+		UnCrouch();
+		return;
+	}
+
+	if(	VaultingComponent->CanVault())
+	{
+		VaultingComponent->Vault();
+	}
+	else
+	{
+		Jump();
+	}
+	
 
 }
 
@@ -188,6 +213,34 @@ void APlayerCharacter::StartCrouch()
 	}
 }
 
+void APlayerCharacter::SwitchFlashlight()
+{
+	if(bEnableFlashlight == false) return;
+	
+	if (bFlashlightOn ==  false)
+	{
+		FlashlightActive(true, 100000.0f);
+	}
+	else
+	{
+		FlashlightActive(false, 0.0f);
+	}
+
+}
+
+void APlayerCharacter::FlashlightActive(bool bActive, float Intensity)
+{
+	Flashlight->SetIntensity(Intensity);
+	Flashlight->SetVisibility(bActive);
+	UGameplayStatics::PlaySound2D(GetWorld(), FlashlightSound);
+	bFlashlightOn = bActive;
+}
+
+void APlayerCharacter::AddNote(FNoteData NoteData)
+{
+	OnAddNoteData.Broadcast(NoteData);
+}
+
 void APlayerCharacter::EquipWeapon(AWeapon* Weapon)
 {
 	const USkeletalMeshSocket* HandSocket = MeshArms->GetSocketByName(FName("WeaponSocket"));
@@ -202,6 +255,12 @@ void APlayerCharacter::EquipWeapon(AWeapon* Weapon)
 void APlayerCharacter::UnEquipWeapon()
 {
 	OnUnEquipWeapon.Broadcast();
+}
+
+void APlayerCharacter::EnableFlashlight()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Enabled"));
+	bEnableFlashlight = true;
 }
 
 void APlayerCharacter::Attack(AWeapon* EquipedWeapon)

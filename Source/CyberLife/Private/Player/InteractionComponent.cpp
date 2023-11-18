@@ -3,6 +3,8 @@
 #include "interactable.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Items/Flashlight.h"
+#include "Items/NoteLog.h"
 #include "Items/Weapon.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 
@@ -55,6 +57,11 @@ void UInteractionComponent::Interact()
 	}
 }
 
+void UInteractionComponent::PickUpNote(const FNoteData& NoteData)
+{
+	OnNoteLogPickUp.Broadcast(NoteData);
+}
+
 bool UInteractionComponent::IsHoldingObject() const
 {
 	return IsValid(HoldingObject);
@@ -81,6 +88,15 @@ void UInteractionComponent::TraceForObject()
 			if (auto* Item = Cast<AItem>(Interactabler))
 			{
 				Interactabler->Interact(this);
+			}
+			else if(auto* Flashlight = Cast<AFlashlight>(Interactabler))
+			{
+				Flashlight->Interact(this);
+				OnFlashlightPickUp.Broadcast();
+			}
+			else if(auto* NoteLog = Cast<ANoteLog>(Interactabler))
+			{
+				NoteLog->Interact(this);
 			}
 			else
 			{

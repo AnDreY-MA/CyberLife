@@ -5,7 +5,6 @@
 
 ULogBook::ULogBook()
 {
-
 	PrimaryComponentTick.bCanEverTick = false;
 
 }
@@ -13,6 +12,8 @@ ULogBook::ULogBook()
 void ULogBook::AddNote(const FNoteData& Note)
 {
 	Notes.Add(Note);
+
+	OnDataUpdated.Broadcast(Note);
 }
 
 

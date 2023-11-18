@@ -13,7 +13,6 @@ class CYBERLIFE_API AInteractableActor : public AActor, public IInteractable
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AInteractableActor();
 
 	virtual void Interact(UInteractionComponent* InteractionComponent) override;

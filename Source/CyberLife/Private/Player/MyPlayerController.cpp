@@ -15,10 +15,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/InteractionComponent.h"
 #include "Player/PlayerCharacter.h"
-#include "UI/InventoryWidget.h"
-#include "UI/StatsWidget.h"
+#include "UI/DisplayWidget.h"
+#include "UI/MainHUD.h"
 
-
+AMyPlayerController::AMyPlayerController()
+{
+	LogBook = CreateDefaultSubobject<ULogBook>("LogBook");
+}
 
 void AMyPlayerController::BeginPlay()
 {
@@ -27,9 +30,6 @@ void AMyPlayerController::BeginPlay()
 	PlayerCharacter = Cast<APlayerCharacter>(GetPawn());
 
 	CreateWidget(this, PointScreen)->AddToViewport();
-	StatsWidget = Cast<UStatsWidget>(CreateWidget(this, Stats));
-	check(StatsWidget);
-	StatsWidget->AddToViewport();
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(MappingContext, 0);
@@ -47,6 +47,14 @@ void AMyPlayerController::BeginPlay()
 		check(GameSaver);
 		UGameplayStatics::SaveGameToSlot(GameSaver, "save1", 0);
 	}
+
+	PlayerCharacter->OnAddNoteData.AddDynamic(this, &AMyPlayerController::AddNote);
+
+	/*MainHUD = Cast<AMainHUD>(GetHUD());
+	if (MainHUD)
+	{
+		UE_LOG(LogTemp, Warning,TEXT("GOOD"));
+	}*/
 	
 }
 
@@ -54,8 +62,8 @@ void AMyPlayerController::InitInventory(UInventoryComponent* InventoryComponent)
 {
 	Inventory = InventoryComponent;
 
-	ActiveInventoryWidget = Cast<UInventoryWidget>(CreateWidget(GetWorld(), InventoryWidgetClass));
-	ActiveInventoryWidget->Init(Inventory, 50.0f);
+	DisplayWidget = Cast<UDisplayWidget>(CreateWidget(GetWorld(), DisplayWidgetClass));
+	DisplayWidget->Init(Inventory, 50.0f, LogBook);
 
 	Inventory->OnEquip.AddDynamic(this, &AMyPlayerController::EquipWeapon);
 	Inventory->OnUnEquip.AddDynamic(this, &AMyPlayerController::UnEquipWeapon);
@@ -64,6 +72,7 @@ void AMyPlayerController::InitInventory(UInventoryComponent* InventoryComponent)
 void AMyPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+	
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{
@@ -76,7 +85,7 @@ void AMyPlayerController::SetupInputComponent()
 
 void AMyPlayerController::ToggleInventoryWidget()
 {
-	if(ActiveInventoryWidget->IsInViewport())
+	if(DisplayWidget->IsInViewport())
 	{
 		HideInventoryWidget();
 	}
@@ -88,7 +97,7 @@ void AMyPlayerController::ToggleInventoryWidget()
 
 void AMyPlayerController::HideInventoryWidget()
 {
-	ActiveInventoryWidget->RemoveFromParent();
+	DisplayWidget->RemoveFromParent();
 	SetShowMouseCursor(false);
 	const FInputModeGameOnly InputModeGameOnly;
 	SetInputMode(InputModeGameOnly);
@@ -96,11 +105,16 @@ void AMyPlayerController::HideInventoryWidget()
 
 void AMyPlayerController::ShowInventoryWidget()
 {
-	ActiveInventoryWidget->AddToViewport();
+	DisplayWidget->AddToViewport();
 	FInputModeGameAndUI InputModeGameAndUI;
 	InputModeGameAndUI.SetHideCursorDuringCapture(false);
 	SetInputMode(InputModeGameAndUI);
 	SetShowMouseCursor(true);
+}
+
+void AMyPlayerController::AddNote(FNoteData NoteData)
+{
+	LogBook->AddNote(NoteData);
 }
 
 void AMyPlayerController::EquipWeapon(UItemObject* WeaponItemObject)
