@@ -40,6 +40,7 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	UMultiLineEditableTextBox* Description;
 
+	//Вызывается при нажатии на кнопку выхода
 	UFUNCTION(BlueprintCallable)
 	void HideNote();
 

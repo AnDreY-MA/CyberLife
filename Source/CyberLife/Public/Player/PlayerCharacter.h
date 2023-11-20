@@ -113,6 +113,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats", meta=(AllowPrivateAccess))
 	float CurrentHealth;
+	
 
 	UPROPERTY()
 	bool bFlashlightOn{ false };
