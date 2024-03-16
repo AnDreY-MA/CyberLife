@@ -3,7 +3,7 @@
 
 #include "UI/StatsWidget.h"
 
-#include "Player/PlayerCharacter.h"
+#include "Characters/Player/PlayerCharacter.h"
 
 void UStatsWidget::ChangeHealth(const float Value)
 {
@@ -13,5 +13,4 @@ void UStatsWidget::ChangeHealth(const float Value)
 
 void UStatsWidget::Setup(APlayerCharacter* PlayerCharacter)
 {
-	PlayerCharacter->OnHealthChanged.AddDynamic(this, &UStatsWidget::ChangeHealth);
 }

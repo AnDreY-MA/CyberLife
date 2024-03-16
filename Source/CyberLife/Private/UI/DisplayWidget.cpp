@@ -8,6 +8,7 @@
 
 void UDisplayWidget::Init(UInventoryComponent* Inventory, const float TileSize, ULogBook* LogBook)
 {
+	check(Inventory);
 	InventoryComponent = Inventory;
 	InventoryGridWidgetBP->Init(Inventory, TileSize);
 	LogBookWidget->Init(LogBook);

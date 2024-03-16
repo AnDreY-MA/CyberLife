@@ -16,7 +16,7 @@ class CYBERLIFE_API ANoteLog : public AInteractableActor
 	GENERATED_BODY()
 
 public:
-	void Interact(UInteractionComponent* InteractionComponent) override;
+	virtual void Interact_Implementation(UInteractionComponent* InteractionComponent) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly)

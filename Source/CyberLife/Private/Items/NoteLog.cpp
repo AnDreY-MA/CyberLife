@@ -3,11 +3,11 @@
 
 #include "Items/NoteLog.h"
 
-#include "Player/InteractionComponent.h"
+#include "Components/InteractionComponent.h"
 
-void ANoteLog::Interact(UInteractionComponent* InteractionComponent)
+void ANoteLog::Interact_Implementation(UInteractionComponent* InteractionComponent)
 {
-	Super::Interact(InteractionComponent);
+	Super::Interact_Implementation(InteractionComponent);
 
 	InteractionComponent->PickUpNote(NoteData);
 	Destroy();

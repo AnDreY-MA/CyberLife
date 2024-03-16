@@ -5,17 +5,16 @@
 
 #include "Camera/CameraComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Engine/StaticMeshSocket.h"
 #include "Items/Bullet.h"
 
 void AFireWeapon::Attack(AActor* OwnerActor)
 {
-	
-	const USkeletalMeshSocket* BarrelSocket = WeaponMesh->GetSocketByName(FName("BarrelSocket"));
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
 	const auto Rotation = OwnerActor->FindComponentByClass<UCameraComponent>()->GetComponentRotation();
-	auto* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, BarrelSocket->GetSocketLocation(WeaponMesh), Rotation);
+	auto* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, MeshComponent->GetSocketLocation(FName("BarrelSocket")), Rotation);
 	Bullet->SetDamatePoint(DamagePower);
 	
 }

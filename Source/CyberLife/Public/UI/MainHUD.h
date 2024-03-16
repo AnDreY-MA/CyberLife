@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "MainHUD.generated.h"
 
+class UStatsWidget;
 class UDisplayWidget;
 class UTitleNoteWidget;
 /**
@@ -24,5 +25,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UTitleNoteWidget> TileNoteWidgetClass;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category="GameUI")
+	TSubclassOf<UStatsWidget> StatsWidgetClass{nullptr};
+	
+	TUniquePtr<UStatsWidget> StatsWidget{nullptr};
 	
 };

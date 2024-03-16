@@ -3,9 +3,12 @@
 
 #include "Items/Flashlight.h"
 
-void AFlashlight::Interact(UInteractionComponent* InteractionComponent)
-{
-	Super::Interact(InteractionComponent);
+#include "Components/InteractionComponent.h"
 
+void AFlashlight::Interact_Implementation(UInteractionComponent* InteractionComponent)
+{
+	Super::Interact_Implementation(InteractionComponent);
+	
+	InteractionComponent->OnFlashlightPickUp.Broadcast();
 	Destroy();
 }

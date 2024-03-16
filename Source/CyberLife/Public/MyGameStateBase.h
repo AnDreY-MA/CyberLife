@@ -13,7 +13,7 @@ class CYBERLIFE_API AMyGameStateBase : public AGameStateBase
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void SpawnItemActor(UItemObject* ItemObject, AActor* Actor, bool bClampGround);
+	void SpawnItemActor(UItemData* ItemObject, AActor* Actor, bool bClampGround);
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess))

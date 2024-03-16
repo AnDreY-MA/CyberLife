@@ -1,9 +1,9 @@
 #include "MyGameStateBase.h"
 
 #include "Items/Item.h"
-#include "Items/ItemObject.h"
+#include "Items/Data/ItemData.h"
 
-void AMyGameStateBase::SpawnItemActor(UItemObject* ItemObject, AActor* Actor, bool bClampGround)
+void AMyGameStateBase::SpawnItemActor(UItemData* ItemObject, AActor* Actor, bool bClampGround)
 {
 	FVector SpawnLocation = Actor->GetActorLocation() + Actor->GetActorForwardVector() * SpawnDistance;
 	if (bClampGround)

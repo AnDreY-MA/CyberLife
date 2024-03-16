@@ -12,11 +12,5 @@ UCLASS()
 class CYBERLIFE_API UWeapon_AnimNotifyState : public UAnimNotifyState
 {
 	GENERATED_BODY()
-
-public:
-	virtual void NotifyBegin(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation, float TotalDuration) override;
-	virtual void NotifyEnd(USkeletalMeshComponent * MeshComp, UAnimSequenceBase * Animation) override;
-
-private:
-	AMeeleWeapon* GetMeeleWeapon(const USkeletalMeshComponent* MeshComp) const;
+	
 };

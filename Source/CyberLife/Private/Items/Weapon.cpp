@@ -1,25 +1,22 @@
 #include "Items/Weapon.h"
-
-#include "Items/ItemObject.h"
+#include "Items/Data/ItemData.h"
 #include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon()
 {
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
-	SetRootComponent(WeaponMesh);
-	MeshComponent->DestroyComponent(true);
+	
 }
-
 
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
-void AWeapon::Interact(UInteractionComponent* InteractionComponent)
+void AWeapon::Interact_Implementation(UInteractionComponent* InteractionComponent)
 {
-	Super::Interact(InteractionComponent);
-	
+	Super::Interact_Implementation(InteractionComponent);
+
+	UE_LOG(LogTemp, Warning, TEXT("Interact"));
 }
 
 void AWeapon::Attack(AActor* OwnerActor)
@@ -30,27 +27,15 @@ void AWeapon::Attack(AActor* OwnerActor)
 
 void AWeapon::Equip()
 {
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ItemObject->EquipWeapon();
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ItemData->EquipWeapon();
 }
 
 void AWeapon::UnEquip()
 {
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	ItemObject->UnEquipWeapon();
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	ItemData->UnEquipWeapon();
 	const FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
-	WeaponMesh->DetachFromComponent(DetachmentTransformRules);
-
-}
-
-void AWeapon::ShowOutline()
-{
-	WeaponMesh->SetRenderCustomDepth(true);
-	
-}
-
-void AWeapon::HideOutline()
-{
-	WeaponMesh->SetRenderCustomDepth(false);
+	MeshComponent->DetachFromComponent(DetachmentTransformRules);
 
 }

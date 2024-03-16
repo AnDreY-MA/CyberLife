@@ -3,12 +3,10 @@
 
 #include "Items/Item.h"
 
-#include "Components/SphereComponent.h"
 #include "Items/InventoryComponent.h"
-#include "Items/ItemObject.h"
-#include "Player/InteractionComponent.h"
-#include "Player/MyPlayerController.h"
-#include "Player/PlayerCharacter.h"
+#include "Components/InteractionComponent.h"
+#include "Items/InventoryComponentInterface.h"
+#include "Items/Data/ItemData.h"
 
 AItem::AItem()
 {
@@ -19,7 +17,7 @@ void AItem::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if(!IsValid(ItemObject))
+	if(!IsValid(ItemData))
 	{
 		InitItemObject();
 	}
@@ -27,26 +25,25 @@ void AItem::BeginPlay()
 
 void AItem::InitItemObject()
 {
-	ItemObject = NewObject<UItemObject>();
-	ItemObject->Dimensions = ItemData.Dimensions;
-	ItemObject->Icon = ItemData.Icon;
-	ItemObject->IconRotated = ItemData.IconRotated;
-	ItemObject->ItemClass = ItemData.ItemClass;
-	ItemObject->BPItemName = ItemData.BPObjectName;
+
 }
 
-void AItem::SetItemObject(UItemObject* ItemObjectParam)
+void AItem::SetItemObject(UItemData* ItemObjectParam)
 {
-	ItemObject = ItemObjectParam;
+	ItemData = ItemObjectParam;
 }
 
-void AItem::Interact(UInteractionComponent* InteractionComponent)
+void AItem::Interact_Implementation(UInteractionComponent* InteractionComponent)
 {
-	const auto* PlayerCharacter = Cast<APlayerCharacter>(InteractionComponent->GetOwner());
-	check(PlayerCharacter)
-	auto* PlayerController = Cast<AMyPlayerController>(PlayerCharacter->GetController());
-	check(PlayerController);
-	PlayerController->GetInventory()->AddItem(ItemObject);
-	Destroy();
+	if(auto* InteractionActor = InteractionComponent->GetOwner(); InteractionActor->Implements<UInventoryComponentInterface>())
+	{
+		if(IInventoryComponentInterface::Execute_GetInventoryComponent(InteractionActor)->TryAddItem(ItemData))
+		{
+			Destroy();
+		}
+		else
+		{
+		}
+	}
 	
 }

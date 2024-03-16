@@ -15,6 +15,6 @@ class CYBERLIFE_API AFlashlight : public AInteractableActor
 	GENERATED_BODY()
 
 public:
-	void Interact(UInteractionComponent* InteractionComponent) override;
+	void Interact_Implementation(UInteractionComponent* InteractionComponent) override;
 	
 };

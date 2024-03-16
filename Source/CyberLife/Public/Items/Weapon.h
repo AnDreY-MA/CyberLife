@@ -1,11 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WeaponInterface.h"
 #include "Items/Item.h"
 #include "Weapon.generated.h"
 
 UCLASS()
-class CYBERLIFE_API AWeapon : public AItem
+class CYBERLIFE_API AWeapon : public AItem, public IWeaponInterface
 {
 	GENERATED_BODY()
 
@@ -13,9 +14,6 @@ public:
 	AWeapon();
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Weapon", meta=(AllowPrivateAccess))
-	USkeletalMeshComponent* WeaponMesh;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess))
 	float DamagePower;
 
@@ -25,15 +23,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Interact(UInteractionComponent* InteractionComponent) override;
+	virtual void Interact_Implementation(UInteractionComponent* InteractionComponent) override;
 	
 	virtual void Attack(AActor* OwnerActor);
 	
 	void Equip();
 	void UnEquip();
-
-protected:
-	virtual void ShowOutline() override;
-	virtual void HideOutline() override;
 	
 };

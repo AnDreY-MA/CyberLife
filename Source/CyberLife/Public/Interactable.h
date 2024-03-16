@@ -23,7 +23,10 @@ class CYBERLIFE_API IInteractable
 
 public:
 
-	virtual void Interact(UInteractionComponent* InteractionComponent) = 0;
-	virtual void ToggleFocus(bool Focus) = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactable Interface")
+	void Interact(UInteractionComponent* InteractionComponent);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Interactable Interface")
+	void ToggleFocus(bool Focus);
 
 };

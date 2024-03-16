@@ -1,25 +1,22 @@
 ﻿#include "Items/MeeleWeapon.h"
 
-#include "Engine/DamageEvents.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "DestructibleComponent.h"
+#include "AbilitySystemBlueprintLibrary.h"
 
 void AMeeleWeapon::Attack(AActor* OwnerActor)
 {
 	Super::Attack(OwnerActor);
 	
-	TriggerWaepon();
-	TriggerAttack();
 }
 
-void AMeeleWeapon::TriggerAttack()
+void AMeeleWeapon::StartAttack_Implementation()
 {
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AMeeleWeapon::OnAttack, 0.05f, true);
 }
 
-void AMeeleWeapon::StopTrigger()
+void AMeeleWeapon::EndAttack_Implementation()
 {
-	UKismetSystemLibrary::K2_ClearAndInvalidateTimerHandle(this, TimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 }
 
 void AMeeleWeapon::BeginPlay()
@@ -30,18 +27,23 @@ void AMeeleWeapon::BeginPlay()
 void AMeeleWeapon::OnAttack()
 {
 	FHitResult HitResult;
-	const FVector Start = WeaponMesh->GetSocketLocation(FName("start"));
-	const FVector End = WeaponMesh->GetSocketLocation(FName("end"));
-	FCollisionQueryParams CollisionQueryParams;
-	CollisionQueryParams.bDebugQuery = true;
+	const FVector Start = MeshComponent->GetSocketLocation(FName("start"));
+	const FVector End = MeshComponent->GetSocketLocation(FName("end"));
+	const TArray<TObjectPtr<AActor>> ActorsIngore{GetInstigator()};
+	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{EObjectTypeQuery::ObjectTypeQuery3, ObjectTypeQuery4};
 	
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Camera, CollisionQueryParams))
+	if (UKismetSystemLibrary::SphereTraceSingleForObjects(GetWorld(), Start, End, 50.f, ObjectTypes,
+		true, ActorsIngore, EDrawDebugTrace::ForDuration, HitResult, true))
 	{
-		const FDamageEvent DamageEvent;
-		const float Damage = HitResult.GetActor()->TakeDamage(DamagePower, DamageEvent, nullptr, nullptr);
+		if(auto* HitActor {HitResult.GetActor()}; HitActor)
+		{
+			FGameplayEventData Payload;
+			Payload.Instigator = GetInstigatorController();
+			Payload.Target = HitActor;
+			Payload.TargetData = UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitActor);
+			UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetInstigatorController(), DamageTag, Payload);
+		}
 
-		HitResult.GetComponent()->AddImpulse(FVector{5.0, 5.0, 5.0} * 5000.0f);
-		UE_LOG(LogTemp, Warning, TEXT("DAMAGE %s"), *HitResult.GetActor()->GetName());
 			
 	}
 	

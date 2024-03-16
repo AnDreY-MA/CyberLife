@@ -17,12 +17,12 @@ class CYBERLIFE_API UStatsWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void ChangeHealth(float Value);
+	void ChangeHealth(const float Value);
 
 	void Setup(APlayerCharacter* PlayerCharacter);
 	
 protected:
 	UPROPERTY(meta=(BindWidget))
-	UTextBlock* HealthText;
+	TObjectPtr<UTextBlock> HealthText;
 	
 };

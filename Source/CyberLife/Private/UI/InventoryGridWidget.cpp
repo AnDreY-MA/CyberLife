@@ -7,7 +7,8 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Items/InventoryComponent.h"
-#include "Items/ItemObject.h"
+#include "Items/Data/ItemData.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UInventoryGridWidget::Init(UInventoryComponent* Inventory, const float SizeTile)
 {
@@ -49,10 +50,54 @@ void UInventoryGridWidget::CreateSlotGrid() const
 	SlotGrid->SetSize(FVector2D{SizeX, SizeY});
 }
 
-UItemObject* UInventoryGridWidget::GetPayload(UDragDropOperation* DragDropOperation) const
+UItemData* UInventoryGridWidget::GetPayload(UDragDropOperation* DragDropOperation) const
 {
 	if (!IsValid(DragDropOperation)) return nullptr;
 
-	auto* ItemObject = Cast<UItemObject>(DragDropOperation->Payload);
+	auto* ItemObject = Cast<UItemData>(DragDropOperation->Payload);
 	return ItemObject;
+}
+
+bool UInventoryGridWidget::IsSpaceForPayload(UItemData* InItem) const
+{
+	if(!InItem) return false;
+	
+	const int32 TileIndex = InventoryComponent->TileToIndex({DragenItemTopLeftTIle.X, DragenItemTopLeftTIle.Y});
+	return InventoryComponent->IsSpaceAvailable(InItem, TileIndex);
+}
+
+void UInventoryGridWidget::OnDropItem(UDragDropOperation* InOperation)
+{
+	auto* Item{GetPayload(InOperation)};
+	if(IsSpaceForPayload(Item))
+	{
+		InventoryComponent->AddItemAt(Item, InventoryComponent->TileToIndex({DragenItemTopLeftTIle.X, DragenItemTopLeftTIle.Y}));
+	}
+	else
+	{
+		if(!InventoryComponent->TryAddItem(Item))
+		{
+			InventoryComponent->SpawnItem(Item, true);
+		}
+	}
+}
+
+void UInventoryGridWidget::GetMousePositionInTile(FVector2D InMousePosition, bool& bRight, bool& bDown) const
+{
+	bRight =  (int)InMousePosition.X % (int)TileSize > TileSize / 2.f;
+	bDown =  (int)InMousePosition.Y % (int)TileSize > TileSize / 2.f;
+
+}
+
+void UInventoryGridWidget::OnRemoveItem(UItemData* InItemObject)
+{
+	InventoryComponent->RemoveItem(InItemObject);
+}
+
+bool UInventoryGridWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent,
+	UDragDropOperation* InOperation)
+{
+	OnDropItem(InOperation);
+	
+	return true;
 }

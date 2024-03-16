@@ -15,5 +15,3 @@ void ULogBook::AddNote(const FNoteData& Note)
 
 	OnDataUpdated.Broadcast(Note);
 }
-
-

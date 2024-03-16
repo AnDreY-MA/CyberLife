@@ -9,7 +9,7 @@
 #include "UI/GridElements.h"
 #include "InventoryGridWidget.generated.h"
 
-class UItemObject;
+class UItemData;
 class UInventoryComponent;
 UCLASS()
 class CYBERLIFE_API UInventoryGridWidget : public UUserWidget
@@ -27,6 +27,7 @@ private:
 	FIntPoint DragenItemTopLeftTIle;
 	UPROPERTY(BlueprintReadWrite, meta=(AllowPrivateAccess))
 	bool bDragDropLocation;
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	UBorder* GridBorder;
@@ -45,6 +46,19 @@ protected:
 	void OnInit();
 
 	UFUNCTION(BlueprintCallable)
-	UItemObject* GetPayload(UDragDropOperation* DragDropOperation) const;
+	UItemData* GetPayload(UDragDropOperation* DragDropOperation) const;
+
+	UFUNCTION(BlueprintPure)
+	bool IsSpaceForPayload(UItemData* InItem) const;
+
+	UFUNCTION(BlueprintCallable)
+	void OnDropItem(UDragDropOperation* InOperation);
+
+	UFUNCTION(BlueprintCallable)
+	void GetMousePositionInTile(FVector2D InMousePosition, bool& bRight, bool& bDown) const;
+
+	void OnRemoveItem(UItemData* InItemObject);
+
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	
 };
