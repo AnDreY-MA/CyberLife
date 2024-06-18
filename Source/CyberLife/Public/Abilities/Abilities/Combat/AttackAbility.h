@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AttackAbilityBase.h"
 #include "Abilities/Abilities/GameplayAbilityBase.h"
 #include "AttackAbility.generated.h"
 
@@ -10,14 +11,20 @@
  * 
  */
 UCLASS()
-class CYBERLIFE_API UAttackAbility : public UGameplayAbilityBase
+class CYBERLIFE_API UAttackAbility : public UAttackAbilityBase
 {
 	GENERATED_BODY()
 
 protected:
+	
+	UAttackAbility();
+	
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	                             const FGameplayAbilityActivationInfo ActivationInfo,
 	                             const FGameplayEventData* TriggerEventData) override;
+
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
 	UFUNCTION()
 	void OnDamageEvent(FGameplayTag EventTag, FGameplayEventData EventData);
@@ -34,6 +41,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Settings|Damage")
 	FGameplayTag HitAbilityTag;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Settings|Damage")
+	FGameplayTag RegenStaminaAbilityTag;
 
 	UPROPERTY()
 	TSet<const AActor*> DamageActors;

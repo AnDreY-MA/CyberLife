@@ -10,8 +10,12 @@ struct FNoteData : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	FString Name;
+	FName Title;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName Name;
 
 	UPROPERTY(EditDefaultsOnly, meta=(MultiLine=true))
 	FText Description;
+	
 };

@@ -9,6 +9,7 @@
 #include "UI/GridElements.h"
 #include "InventoryGridWidget.generated.h"
 
+class UInventoryComponentInterface;
 class UItemData;
 class UInventoryComponent;
 UCLASS()
@@ -17,6 +18,9 @@ class CYBERLIFE_API UInventoryGridWidget : public UUserWidget
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess))
+	TScriptInterface<UInventoryComponentInterface> InventoryInterface;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess))
 	UInventoryComponent* InventoryComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess))

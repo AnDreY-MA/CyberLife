@@ -9,9 +9,8 @@ ULogBook::ULogBook()
 
 }
 
-void ULogBook::AddNote(const FNoteData& Note)
+void ULogBook::AddNote_Implementation(const FNoteData& Note)
 {
 	Notes.Add(Note);
 
-	OnDataUpdated.Broadcast(Note);
 }

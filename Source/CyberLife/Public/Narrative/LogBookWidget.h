@@ -12,6 +12,7 @@ class UBorder;
 class UVerticalBox;
 class UTitleNoteWidget;
 class UTextBlock;
+class ULogBook;
 /**
  * 
  */
@@ -21,8 +22,12 @@ class CYBERLIFE_API ULogBookWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void Init(ULogBook* InLogBook);
+	virtual void NativeOnInitialized() override;
 
+	void Show();
+
+	void Hide();
+	
 protected:
 
 	UPROPERTY(meta=(BindWidget))
@@ -46,7 +51,7 @@ protected:
 
 private:
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category="ItemNote")
 	TSubclassOf<UUserWidget> TitleNoteWidgetClass;
 
 	UFUNCTION()

@@ -1,4 +1,4 @@
-// Mamont Protaction copy rights
+ // Mamont Protaction copy rights
 
 #pragma once
 
@@ -7,6 +7,8 @@
 #include "AIController.h"
 #include "EnemyControllerInterface.h"
 #include "Abilities/Component/AbilityComponentBase.h"
+#include "AI/AIState.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "EnemyControllerBase.generated.h"
 
 
@@ -23,8 +25,24 @@ public:
 	virtual void Attack_Implementation() override;
 
 	virtual AActor* GetAttackTarget_Implementation() const override;
+
 	
 	virtual void OnPossess(APawn* InPawn) override;
+
+protected:
+	virtual void BeginPlay() override;
+	
+	UFUNCTION(BlueprintPure)
+	EAIState GetCurrentState() const;
+
+	UFUNCTION(BlueprintCallable)
+	void HandleSensedSound(const FVector& InLocatio);
+
+	UFUNCTION(BlueprintCallable)
+	void HandleSensedSight(AActor* InTarget);
+
+	UFUNCTION(BlueprintCallable)
+	bool CanSenseActor(AActor* InActor, EAISenseState InState, FAIStimulus& OutStimulus);
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Ability", meta=(AllowPrivateAccess="true"))
@@ -62,5 +80,8 @@ private:
 
 	UFUNCTION(BlueprintCallable, Category="States")
 	void SetStateAsInvestigating(const FVector& InLocation);
+
+	UFUNCTION()
+	void OnHealthChange(float NewValue, float OldValue, float Magintude);
 	
 };

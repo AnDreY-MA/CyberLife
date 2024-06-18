@@ -12,5 +12,6 @@ enum class EAbilityInputID : uint8
 	Confirm,
 	Attack,
 	Interact,
-	ToggleFlashlight
+	ToggleFlashlight,
+	Sprint
 };

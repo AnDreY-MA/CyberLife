@@ -53,6 +53,8 @@ FReply UItemWidget::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, 
 {
 	if(InMouseEvent.IsMouseButtonDown(EquipKey))
 	{
+		if(!ItemObject) return UWidgetBlueprintLibrary::Handled().NativeReply;
+		
 		if(ItemObject->IsEquiped())
 		{
 			OnItemUnequiped.Broadcast();

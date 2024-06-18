@@ -14,12 +14,6 @@ public:
 	AWeapon();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess))
-	float DamagePower;
-
-	UPROPERTY(EditDefaultsOnly)
-	USoundBase* AttackSound;
-	
 	virtual void BeginPlay() override;
 
 public:
@@ -29,5 +23,12 @@ public:
 	
 	void Equip();
 	void UnEquip();
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category="Sound")
+	TObjectPtr<USoundBase> AttackSound;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess))
+	float DamagePower;
 	
 };

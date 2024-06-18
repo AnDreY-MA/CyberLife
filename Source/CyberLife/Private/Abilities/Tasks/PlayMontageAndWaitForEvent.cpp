@@ -138,7 +138,9 @@ void UPlayMontageAndWaitForEvent::Activate()
 				MontageEndedDelegate.BindUObject(this, &UPlayMontageAndWaitForEvent::OnMontageEnded);
 				AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, MontageToPlay);
 
-				ACharacter* Character = Cast<ACharacter>(GetAvatarActor());
+				
+				ACharacter* Character = GetAvatarActor()->GetInstigatorController()->GetCharacter();
+					//Cast<ACharacter>(GetAvatarActor());
 				if (Character && (Character->GetLocalRole() == ROLE_Authority ||
 					(Character->GetLocalRole() == ROLE_AutonomousProxy && Ability->GetNetExecutionPolicy() == EGameplayAbilityNetExecutionPolicy::LocalPredicted)))
 				{

@@ -15,7 +15,7 @@ void AFireWeapon::Attack(AActor* OwnerActor)
 
 	const auto Rotation = OwnerActor->FindComponentByClass<UCameraComponent>()->GetComponentRotation();
 	auto* Bullet = GetWorld()->SpawnActor<ABullet>(BulletClass, MeshComponent->GetSocketLocation(FName("BarrelSocket")), Rotation);
-	Bullet->SetDamatePoint(DamagePower);
+	//Bullet->SetDamatePoint(DamagePower);
 	
 }
 

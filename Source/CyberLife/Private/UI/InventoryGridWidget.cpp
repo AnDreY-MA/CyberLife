@@ -22,6 +22,7 @@ void UInventoryGridWidget::Init(UInventoryComponent* Inventory, const float Size
 void UInventoryGridWidget::CreateLineSegemnts()
 {
 	float X = 0.0f;
+	float Y = 0.0f;
 	for (auto I = 0; I <= InventoryComponent->GetColumns(); ++I)
 	{
 		X = I * TileSize;
@@ -30,14 +31,13 @@ void UInventoryGridWidget::CreateLineSegemnts()
 			FVector2D {X, InventoryComponent->GetRows() * TileSize}};
 		Lines.Add(NewLine);
 	}
-
-	float Y = 0.0f;
+	
 	for (auto I = 0; I <= InventoryComponent->GetRows(); ++I)
 	{
 		Y = I * TileSize;
 
 		FLine NewLine = {FVector2D{0.0f, Y},
-			FVector2D {InventoryComponent->GetColumns() * TileSize, Y}};
+			FVector2D {InventoryComponent->GetRows() * TileSize, Y}};
 		Lines.Add(NewLine);
 	}
 }

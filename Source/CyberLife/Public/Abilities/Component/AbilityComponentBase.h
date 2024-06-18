@@ -31,13 +31,16 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void ActivateAbility(const EAbilityInputID InputID);
+	virtual void ActivateAbility(const EAbilityInputID& InputID);
+	virtual void ReleaseAbility(const EAbilityInputID& InputID);
 	
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Abilities")
-	TArray<TSubclassOf<UGameplayAbilityBase>> DefaultAbilities;
-
+	TArray<TSubclassOf<UGameplayAbilityBase>> InputAbilities;
 	UPROPERTY(EditDefaultsOnly, Category="Abilities")
+	TArray<TSubclassOf<UGameplayAbility>> DefaultAbilities;
+
+	UPROPERTY(EditDefaultsOnly, Category="Attributes")
 	TArray<FAttributeConfig> AttributeConfigs;
 	
 };

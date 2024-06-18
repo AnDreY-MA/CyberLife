@@ -20,6 +20,15 @@ class CYBERLIFE_API IMainHUDInterface
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Main HUD| Display Widget")
+	void SwitchDisplay();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Main HUD| Stats Widget")
+	void ChangeHealth(const float Magnitude, const float NewValue, const float OldValue);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Main HUD| Stats Widget")
+	void ChangeStamina(const float Magnitude, const float NewValue, const float OldValue);
+	
 };

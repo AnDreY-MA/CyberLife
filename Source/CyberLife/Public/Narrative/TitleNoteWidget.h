@@ -8,6 +8,7 @@
 #include "TitleNoteWidget.generated.h"
 
 class UTextBlock;
+class UBorder;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShowNoteData, FNoteData, NoteData);
 
@@ -24,23 +25,20 @@ public:
 
 	FOnShowNoteData OnShowNoteData;
 
-	
-
 protected:
-	UPROPERTY(meta=(BindWidget))
-	UTextBlock* Title;
-
-	
-	UPROPERTY(meta=(BindWidget))
-	UBorder* Border;
 
 	UFUNCTION(BlueprintCallable)
 	void MouseClick();
 
 
 private:
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> Title;
+	
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UBorder> Border;
+	
 	UPROPERTY()
 	FNoteData NoteDataLink;
-
 	
 };

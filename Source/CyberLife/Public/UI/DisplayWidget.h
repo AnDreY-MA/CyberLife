@@ -17,22 +17,24 @@ UCLASS()
 class CYBERLIFE_API UDisplayWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	UBorder* BackgroundBorder;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	UBackgroundBlur* BackgroundBlur;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	UInventoryGridWidget* InventoryGridWidgetBP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	TObjectPtr<ULogBookWidget> LogBookWidget;
-
 public:
-	void Init(UInventoryComponent* Inventory, float TileSize, ULogBook* LogBook);
+	void Init(UInventoryComponent* Inventory, float TileSize);
+
+	void Show();
+
+	virtual void RemoveFromParent() override;
 
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess))
-	UInventoryComponent* InventoryComponent;
+	TObjectPtr<UInventoryComponent> InventoryComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UBorder> BackgroundBorder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UBackgroundBlur> BackgroundBlur;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UInventoryGridWidget> InventoryGridWidgetBP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<ULogBookWidget> LogBookWidget;
 };

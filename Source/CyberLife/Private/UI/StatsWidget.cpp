@@ -3,14 +3,23 @@
 
 #include "UI/StatsWidget.h"
 
-#include "Characters/Player/PlayerCharacter.h"
+#include "Components/ProgressBar.h"
 
-void UStatsWidget::ChangeHealth(const float Value)
+void UStatsWidget::ChangeHealth(const float NewValue, const float OldValue, const float Magnitude)
 {
-	HealthText->SetText(FText::AsNumber(Value));
+	ChangePercentOnBar(HealthBar, NewValue, OldValue);
+
+}
+
+void UStatsWidget::ChangeStamina(const float NewValue, const float OldValue, float Magnitude)
+{
+	ChangePercentOnBar(StaminaBar, NewValue, OldValue);
 	
 }
 
-void UStatsWidget::Setup(APlayerCharacter* PlayerCharacter)
+void UStatsWidget::ChangePercentOnBar(const TObjectPtr<UProgressBar> InBar, const float NewValue, const float OldValue)
 {
+	const float NewPercent {InBar->GetPercent() - (OldValue - NewValue) / 100};
+	InBar->SetPercent(NewPercent);
+	
 }

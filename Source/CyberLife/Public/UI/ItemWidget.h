@@ -14,6 +14,8 @@ class UItemObject;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemRemoved, UItemData*, ItemObject);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemEquiped, UItemData*, ItemObject);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnItemUnequiped);
+
+
 UCLASS()
 class CYBERLIFE_API UItemWidget : public UUserWidget
 {
@@ -27,12 +29,21 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnItemUnequiped OnItemUnequiped;
 	
-
 	UFUNCTION(BlueprintCallable)
 	void Init(UItemData* ItemObjectParam, float FloatSizeParam);
 	UFUNCTION(BlueprintCallable)
 	void Refresh();
 
+protected:
+	UFUNCTION(BlueprintPure)
+	FSlateBrush GetItemImage() const;
+
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess))
 	UItemData* ItemObject;
@@ -51,22 +62,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="InputKey", meta=(AllowPrivateAccess))
 	FKey EquipKey;
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	UBorder* BackgroundBorder;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	USizeBox* BackgroundSizeBox;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	UImage* ItemImage;
-
-	UFUNCTION(BlueprintPure)
-	FSlateBrush GetItemImage() const;
-
-	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
-
-	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual FReply NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess))
+	TObjectPtr<UBorder> BackgroundBorder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess))
+	TObjectPtr<USizeBox> BackgroundSizeBox;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget), meta=(AllowPrivateAccess))
+	TObjectPtr<UImage> ItemImage;
+
 };

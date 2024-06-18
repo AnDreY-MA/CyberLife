@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LogBookInterface.h"
 #include "Components/ActorComponent.h"
 #include "NoteData.h"
 #include "LogBook.generated.h"
@@ -14,7 +15,7 @@ class UUserWidget;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class CYBERLIFE_API ULogBook : public UActorComponent
+class CYBERLIFE_API ULogBook : public UActorComponent, public ILogBookInterface
 {
 	GENERATED_BODY()
 
@@ -23,9 +24,9 @@ public:
 
 	FOnDataUpdated OnDataUpdated;
 	
-	void AddNote(const FNoteData& Note);
+	void AddNote_Implementation(const FNoteData& Note);
 
-	TSubclassOf<UUserWidget> GetTitleNoteWidget() { return TileNoteWidgetclass; }
+	TArray<FNoteData> GetNotes_Implementation() const { return Notes; }
 	
 protected:
 

@@ -9,25 +9,22 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 
 UInteractionComponent::UInteractionComponent() :
-	InteractDistance(0.0f)
+	InteractDistance(0.0f), ForceThrow(0)
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	TraceInteract();
 
-	if(HoldingObject)
+	if(HoldingObject.Get())
 	{
 		PhysicsHandle->SetTargetLocationAndRotation(DefaultGrabObjectLocation->GetComponentLocation(),
 			DefaultGrabObjectLocation->GetComponentRotation());
 	}
-
-	TraceInteract();
 
 }
 
@@ -48,11 +45,11 @@ void UInteractionComponent::Init(UPhysicsHandleComponent* PhysicsHandleComponent
 
 void UInteractionComponent::Interact()
 {
-	if(!HoldingObject)
+	if(!HoldingObject.Get())
 	{
 		TraceForObject();
 	}
-	else if (HoldingObject)
+	else if (HoldingObject.Get())
 	{
 		DropObject();
 	}
@@ -65,7 +62,7 @@ void UInteractionComponent::PickUpNote(const FNoteData& NoteData)
 
 bool UInteractionComponent::IsHoldingObject() const
 {
-	return IsValid(HoldingObject);
+	return IsValid(HoldingObject.Get());
 }
 
 void UInteractionComponent::ThrowObject()
@@ -81,8 +78,10 @@ void UInteractionComponent::TraceForObject()
 	
 	const FVector End = CameraComponent->GetForwardVector() * InteractDistance + Start;
 	FHitResult HitResult;
-	
-	if(GetWorld()->LineTraceSingleByObjectType(HitResult, Start, End, ECC_PhysicsBody))
+
+	TArray<AActor*> ActorsIgnore;
+	ActorsIgnore.Add(GetOwner());
+	if(UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), Start, End, InteractableTypes, true, ActorsIgnore, EDrawDebugTrace::None, HitResult, true))
 	{
 		if(auto* Interactabler = HitResult.GetActor(); Interactabler->Implements<UInteractable>()
 			&& !Interactabler->Implements<UGrabObjectInterface>())
@@ -105,6 +104,7 @@ void UInteractionComponent::GrabObject(const FHitResult& HitResult)
 	HoldingObject = HitResult.GetComponent();
 	HoldingObject->SetCollisionResponseToChannel(ECC_Destructible, ECR_Ignore);
 	SetComponentTickEnabled(true);
+
 	
 }
 
@@ -121,8 +121,10 @@ void UInteractionComponent::TraceInteract()
 	const FVector End = CameraComponent->GetForwardVector() * InteractDistance + Start;
 	FHitResult HitResult;
 
-	if(UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), Start, End, TraceObjectTypes, true, {GetOwner()}, EDrawDebugTrace::None,
-		HitResult, true))
+	TArray<AActor*> ActorsIgnore;
+	ActorsIgnore.Add(GetOwner());
+	if(UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), Start, End, InteractableTypes, true, ActorsIgnore,
+		EDrawDebugTrace::None, HitResult, true))
 	{
 		if(auto* HitActor{HitResult.GetActor()}; HitActor)
 		{

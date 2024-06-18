@@ -21,6 +21,8 @@ class UStatsWidget;
 class UDisplayWidget;
 class UAbilityComponentBase;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickupNote, const FNoteData&, InNote);
+
 UCLASS()
 class CYBERLIFE_API AMyPlayerController : public APlayerController, public IAbilitySystemInterface
 {
@@ -29,12 +31,13 @@ class CYBERLIFE_API AMyPlayerController : public APlayerController, public IAbil
 public:
 	AMyPlayerController();
 
+	FOnPickupNote OnPickupNote;
+
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 protected:
 	UFUNCTION(BlueprintCallable)
 	void InitInventory(UInventoryComponent* InventoryComponent);
-
 
 private:
 
@@ -61,11 +64,13 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> FlashlightAction;
-	
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> ToggleInventoryAction;
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> AttackAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	TObjectPtr<UInputAction> SprintAction;
 
 #pragma endregion Input
 	
@@ -86,10 +91,13 @@ private:
 	/**
 	 * Methods
 	 */
-	
+
 	virtual void BeginPlay() override;
+	
 	virtual void SetupInputComponent()override;
 
+	void SprintStart();
+	void SprintEnd();
 	void Jumping();
 	void StopJumping();
 	void Interact();
@@ -108,12 +116,10 @@ private:
 	UFUNCTION()
 	void AddNote(FNoteData NoteData);
 
-	template<typename T>
-	static T* CreateBlueprintDefferd(UWorld* World, const FString& Name, const FTransform& Transform = FTransform::Identity)
-	{
-		const UBlueprint* Blueprint = LoadObject<UBlueprint>(nullptr, *Name);
-		return (World && Blueprint) ? World->SpawnActorDeferred<T>(Blueprint->GeneratedClass, Transform) : nullptr;
-	}
+	UFUNCTION()
+	void OnChangeHealth(const float NewValue, const float OldValue, const float Magnitude);
+	UFUNCTION()
+	void OnChangeStamina(const float NewValue, const float OldValue, const float Magnitude);
 
 	friend class APlayerCharacter;
 	

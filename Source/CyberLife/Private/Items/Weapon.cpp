@@ -33,9 +33,15 @@ void AWeapon::Equip()
 
 void AWeapon::UnEquip()
 {
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	if(!MeshComponent || !ItemData) return;
+	
 	ItemData->UnEquipWeapon();
+
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	
 	const FDetachmentTransformRules DetachmentTransformRules(EDetachmentRule::KeepWorld, true);
 	MeshComponent->DetachFromComponent(DetachmentTransformRules);
+
+	Destroy();
 
 }

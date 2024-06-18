@@ -6,10 +6,22 @@
 #include "Narrative/LogBookWidget.h"
 #include "UI/InventoryGridWidget.h"
 
-void UDisplayWidget::Init(UInventoryComponent* Inventory, const float TileSize, ULogBook* LogBook)
+void UDisplayWidget::Init(UInventoryComponent* Inventory, const float TileSize)
 {
 	check(Inventory);
 	InventoryComponent = Inventory;
 	InventoryGridWidgetBP->Init(Inventory, TileSize);
-	LogBookWidget->Init(LogBook);
+}
+
+void UDisplayWidget::Show()
+{
+	LogBookWidget->Show();
+
+}
+
+void UDisplayWidget::RemoveFromParent()
+{
+	LogBookWidget->RemoveFromParent();
+	
+	Super::RemoveFromParent();
 }

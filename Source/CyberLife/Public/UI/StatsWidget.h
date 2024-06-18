@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
 #include "StatsWidget.generated.h"
 
+class UProgressBar;
+class UVerticalBox;
 class APlayerCharacter;
 /**
  * 
@@ -17,12 +18,20 @@ class CYBERLIFE_API UStatsWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void ChangeHealth(const float Value);
+	void ChangeHealth(const float NewValue, const float OldValue, const float Magnitude);
+	void ChangeStamina(float NewValue, float OldValue, float Magnitude);
 
-	void Setup(APlayerCharacter* PlayerCharacter);
-	
-protected:
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> HealthText;
+private:
+
+	UPROPERTY(meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UVerticalBox> BoxStats;
+
+	UPROPERTY(meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UProgressBar> HealthBar;
+
+	UPROPERTY(meta=(BindWidget), meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UProgressBar> StaminaBar;
+
+	void ChangePercentOnBar(TObjectPtr<UProgressBar> InBar, const float NewValue, const float OldValue);
 	
 };

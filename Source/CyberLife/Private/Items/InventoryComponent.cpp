@@ -136,8 +136,6 @@ void UInventoryComponent::EquipWeapon(UItemData* ItemObject)
 void UInventoryComponent::UnequipWeapon()
 {
 	EquipedWeapon->UnEquip();
-	EquipedWeapon->Destroy();
-
 	OnUnEquip.Broadcast();
 	
 }
@@ -175,6 +173,7 @@ void UInventoryComponent::AddItemAt(UItemData* ItemObject, const int32 TopLeftIn
 	const int32 XLastIndex = IndexToTile(TopLeftIndex).X + (ItemObject->GetDimensions().X - 1);
 	const int32 YFirstIndex = IndexToTile(TopLeftIndex).Y;
 	const int32 YLastIndex = IndexToTile(TopLeftIndex).Y + (ItemObject->GetDimensions().Y - 1);
+
 	for (int32 X = XFirstIndex; X <= XLastIndex; ++X)
 	{
 		for(int32 Y = YFirstIndex; Y <= YLastIndex; ++Y)

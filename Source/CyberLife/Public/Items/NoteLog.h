@@ -19,7 +19,7 @@ public:
 	virtual void Interact_Implementation(UInteractionComponent* InteractionComponent) override;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	FNoteData NoteData;
+	UPROPERTY(EditAnywhere, meta=(RowType=NoteData))
+	FDataTableRowHandle NoteData;
 	
 };

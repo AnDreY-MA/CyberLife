@@ -6,11 +6,13 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputAction.h"
+#include "Abilities/Attributes/CharacterAttributeSet.h"
 #include "Abilities/Component/AbilityComponentBase.h"
 #include "Blueprint/UserWidget.h"
 #include "Characters/Player/PlayerCharacter.h"
+#include "GameFramework/HUD.h"
 #include "Items/Item.h"
-#include "UI/DisplayWidget.h"
+#include "UI/HUD/MainHUDInterface.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogPlayer, All, All);
 
@@ -28,7 +30,6 @@ void AMyPlayerController::BeginPlay()
 
 	AbilityComponent->InitAbilityActorInfo(this, GetPawn());
 
-	CreateWidget(this, PointScreen)->AddToViewport();
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
 		GetLocalPlayer()))
 	{
@@ -36,6 +37,10 @@ void AMyPlayerController::BeginPlay()
 	}
 
 	PlayerCharacter->OnAddNoteData.AddDynamic(this, &AMyPlayerController::AddNote);
+
+	auto* Attribute = AbilityComponent->GetSet<UCharacterAttributeSet>();
+	Attribute->OnHealthChanged.AddDynamic(this, &AMyPlayerController::OnChangeHealth);
+	Attribute->OnStaminaChanged.AddDynamic(this, &AMyPlayerController::OnChangeStamina);
 }
 
 void AMyPlayerController::SetupInputComponent()
@@ -66,8 +71,13 @@ void AMyPlayerController::SetupInputComponent()
 
 		EnhancedInputComponent->BindAction(FlashlightAction, ETriggerEvent::Triggered, this,
 		                                   &AMyPlayerController::SwitchFlashlight);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this,
+		                                   &AMyPlayerController::SprintStart);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this,
+		                                   &AMyPlayerController::SprintEnd);
 	}
 }
+
 
 UAbilitySystemComponent* AMyPlayerController::GetAbilitySystemComponent() const
 {
@@ -105,10 +115,20 @@ void AMyPlayerController::Attack()
 	
 }
 
+void AMyPlayerController::SprintStart()
+{
+	AbilityComponent->ActivateAbility(EAbilityInputID::Sprint);
+}
+
+void AMyPlayerController::SprintEnd()
+{
+	AbilityComponent->ReleaseAbility(EAbilityInputID::Sprint);
+}
+
 void AMyPlayerController::InitInventory(UInventoryComponent* InventoryComponent)
 {
-	DisplayWidget = Cast<UDisplayWidget>(CreateWidget(this, DisplayWidgetClass));
-	DisplayWidget->Init(InventoryComponent, 50.f, LogBook);
+	//DisplayWidget = Cast<UDisplayWidget>(CreateWidget(this, DisplayWidgetClass));
+	//DisplayWidget->Init(InventoryComponent, 50.f, LogBook);
 
 }
 
@@ -126,38 +146,33 @@ void AMyPlayerController::Look(const FInputActionValue& Value)
 
 void AMyPlayerController::ToggleInventoryWidget()
 {
-	if (DisplayWidget->IsInViewport())
-	{
-		HideInventoryWidget();
-	}
-	else
-	{
-		ShowInventoryWidget();
-	}
-
-}
-
-void AMyPlayerController::HideInventoryWidget()
-{
-	DisplayWidget->RemoveFromParent();
-	SetShowMouseCursor(false);
-	const FInputModeGameOnly InputModeGameOnly;
-	SetInputMode(InputModeGameOnly);
-
-}
-
-void AMyPlayerController::ShowInventoryWidget()
-{
-	DisplayWidget->AddToViewport();
-	FInputModeGameAndUI InputModeGameAndUI;
-	InputModeGameAndUI.SetHideCursorDuringCapture(false);
-	SetInputMode(InputModeGameAndUI);
-	SetShowMouseCursor(true);
-
+	IMainHUDInterface::Execute_SwitchDisplay(GetHUD());
+	
 }
 
 void AMyPlayerController::AddNote(FNoteData NoteData)
 {
+	UE_LOG(LogTemp, Warning, TEXT("ADDED Note"));
 	LogBook->AddNote(NoteData);
 
+}
+
+void AMyPlayerController::OnChangeHealth(const float NewValue, const float OldValue, const float Magnitude)
+{
+	if(auto* HUD{GetHUD()}; HUD->Implements<UMainHUDInterface>())
+	{
+		IMainHUDInterface::Execute_ChangeHealth(HUD, Magnitude, NewValue, OldValue);
+	}
+	if(NewValue <= 0.0f)
+	{
+		GetPawn()->Destroy();
+	}
+}
+
+void AMyPlayerController::OnChangeStamina(const float NewValue, const float OldValue, const float Magnitude)
+{
+	if(auto* HUD{GetHUD()}; HUD->Implements<UMainHUDInterface>())
+	{
+		IMainHUDInterface::Execute_ChangeStamina(HUD, Magnitude, NewValue, OldValue);
+	}
 }

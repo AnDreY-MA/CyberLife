@@ -26,7 +26,6 @@ class USpotLightComponent;
 
 //For PlayerAnimInstance
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipMeeleWeapon);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float, ValueChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAddNoteData, FNoteData, NoteData);
 
 
@@ -38,7 +37,6 @@ class CYBERLIFE_API APlayerCharacter : public ACharacterBase, public IInteractio
 public:
 	APlayerCharacter();
 	
-	FOnHealthChanged OnHealthChanged;
 	FOnAddNoteData OnAddNoteData;
 
 	FORCEINLINE virtual UInteractionComponent* GetInteractionComponent_Implementation() override { return InteractionComponent; }
@@ -102,6 +100,7 @@ private:
 	/*
 		Metods
 	*/
+
 	
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -121,7 +120,7 @@ private:
 	void FlashlightActive(bool bActive, float Intensity);
 
 	UFUNCTION()
-	void AddNote(const FNoteData& NoteData);
+	void OnNotePickup(FNoteData NoteData);
 	
 	UFUNCTION()
 	void EquipWeapon(AWeapon* Weapon);

@@ -65,10 +65,13 @@ void APlayerCharacter::BeginPlay()
 	InteractionComponent->Init(PhysicsHandle, DefaultGrabObjectLocation, CameraComponent);
 	
 	InteractionComponent->OnFlashlightPickUp.AddDynamic(this, &APlayerCharacter::EnableFlashlight);
+	InteractionComponent->OnNoteLogPickUp.AddDynamic(this, &APlayerCharacter::OnNotePickup);
 
 	Cast<AMyPlayerController>(GetController())->InitInventory(Inventory);
 	Inventory->OnEquip.AddDynamic(this, &APlayerCharacter::EquipWeapon);
 	Inventory->OnUnEquip.AddDynamic(this, &APlayerCharacter::UnequipWeapon);
+
+	
 	
 }
 
@@ -85,6 +88,7 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
 {
 	if (Controller == nullptr) return;
 	const FVector2D MovementVector = Value.Get<FVector2D>();
+	
 	AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 	AddMovementInput(GetActorRightVector(), MovementVector.X);
 }
@@ -190,9 +194,10 @@ void APlayerCharacter::FlashlightActive(bool bActive, float Intensity)
 	bFlashlightOn = bActive;
 }
 
-void APlayerCharacter::AddNote(const FNoteData& NoteData)
+void APlayerCharacter::OnNotePickup(FNoteData NoteData)
 {
-	OnAddNoteData.Broadcast(NoteData);
+	const auto* PlayerController {Cast<AMyPlayerController>(GetController())};
+	PlayerController->OnPickupNote.Broadcast(NoteData);
 }
 
 void APlayerCharacter::EnableFlashlight()

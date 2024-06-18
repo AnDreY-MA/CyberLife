@@ -11,12 +11,21 @@ void UCharacterAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModC
 
 	if(Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Change Health"));
-		
 		if(OnHealthChanged.IsBound())
 		{
 			const float OldValue = GetHealth() - Data.EvaluatedData.Magnitude;
-			OnHealthChanged.Broadcast(Data.EvaluatedData.Magnitude, OldValue, GetHealth());
+			OnHealthChanged.Broadcast(GetHealth(), OldValue, Data.EvaluatedData.Magnitude);
 		}
 	}
+
+	if(Data.EvaluatedData.Attribute == GetStaminaAttribute())
+	{
+		SetStamina(FMath::Clamp(GetStamina(), 0, GetMaxStamina()));
+		if(OnStaminaChanged.IsBound())
+		{
+			const float OldValue = GetStamina() - Data.EvaluatedData.Magnitude;
+			OnStaminaChanged.Broadcast(GetStamina(), OldValue, Data.EvaluatedData.Magnitude);
+		}
+	}
+
 }

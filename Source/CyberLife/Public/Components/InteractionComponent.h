@@ -26,7 +26,6 @@ public:
 	
 	FOnFlashlightPickUp OnFlashlightPickUp;
 	FOnNoteLogPickUp OnNoteLogPickUp;
-	
 
 	void Init(UPhysicsHandleComponent* PhysicsHandleComponent, UArrowComponent* DefaultLocation, UCameraComponent* CameraComponentParam);
 	void Interact();
@@ -40,21 +39,21 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Interact", meta=(AllowPrivateAccess))
 	float InteractDistance;
 	UPROPERTY(EditDefaultsOnly, Category="Interact")
-	TArray<TEnumAsByte<EObjectTypeQuery>> TraceObjectTypes;
+	TArray<TEnumAsByte<EObjectTypeQuery>> InteractableTypes;
 	UPROPERTY(VisibleAnywhere, Category="Interact")
 	TObjectPtr<AActor> FocusedActor;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Grabing", meta=(AllowPrivateAccess))
 	float ForceThrow;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	TObjectPtr<UArrowComponent> DefaultGrabObjectLocation;
+	TWeakObjectPtr<UArrowComponent> DefaultGrabObjectLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	TObjectPtr<UPrimitiveComponent> HoldingObject;
+	TWeakObjectPtr<UPrimitiveComponent> HoldingObject;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	TObjectPtr<UCameraComponent> CameraComponent;
+	TWeakObjectPtr<UCameraComponent> CameraComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grabing", meta=(AllowPrivateAccess))
-	UPhysicsHandleComponent* PhysicsHandle;
+	TWeakObjectPtr<UPhysicsHandleComponent> PhysicsHandle;
 
 private:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

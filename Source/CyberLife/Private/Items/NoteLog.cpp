@@ -4,11 +4,16 @@
 #include "Items/NoteLog.h"
 
 #include "Components/InteractionComponent.h"
+#include "Narrative/LogBook.h"
 
 void ANoteLog::Interact_Implementation(UInteractionComponent* InteractionComponent)
 {
-	Super::Interact_Implementation(InteractionComponent);
-
-	InteractionComponent->PickUpNote(NoteData);
+	if(auto* LogBook {InteractionComponent->GetOwner()->GetInstigatorController()->FindComponentByInterface(ULogBookInterface::StaticClass())};
+		LogBook)
+	{
+		ILogBookInterface::Execute_AddNote(LogBook, *NoteData.GetRow<FNoteData>(""));
+	}
+	
 	Destroy();
+
 }

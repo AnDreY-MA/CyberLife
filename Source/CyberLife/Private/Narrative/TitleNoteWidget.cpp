@@ -9,7 +9,6 @@
 void UTitleNoteWidget::Init(const FNoteData& InNoteData)
 {
 	NoteDataLink = InNoteData;
-	Title->SetText(FText::FromString(NoteDataLink.Name));
 	SetPadding(FMargin{0.0, 10.0, 0.0, 10.0});
 	
 }
